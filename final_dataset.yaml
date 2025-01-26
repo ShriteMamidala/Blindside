@@ -1,0 +1,4 @@
+train: C:/Users/shrit/Desktop/Ml_Projects/Blindside/Blindside/data/final_dataset/images
+val: C:/Users/shrit/Desktop/Ml_Projects/Blindside/Blindside/data/final_dataset/images  # Use train as val if no separate validation set
+nc: 4  # Number of classes
+names: ['person', 'car', 'crosswalk', 'stop sign']
