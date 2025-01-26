@@ -1,6 +1,10 @@
 from fastapi import FastAPI, WebSocket
+from fastapi.staticfiles import StaticFiles
+from fastapi.websockets import WebSocketDisconnect
 
 app = FastAPI()
+
+app.mount("/static", StaticFiles(directory="frontend", html=True), name="static")
 
 @app.get("/")
 async def root():
@@ -10,25 +14,34 @@ async def root():
 @app.websocket("/ws/blind")
 async def websocket_endpoint_blind(websocket: WebSocket):
     await websocket.accept()
-    await websocket.send_text("WebSocket for blind person connected")
-    while True:
-        try:
-            data = await websocket.receive_text()
-            print(f"Received from blind person: {data}")
-            await websocket.send_text("Processing your input...")
-        except Exception as e:
-            print(f"Connection closed: {e}")
-            break
+    try:
+        while True:
+            # Assuming you are expecting to receive binary data
+            frame_data = await websocket.receive_bytes()
+            # Process received frame data here...
+            await websocket.send_text("Frame received")
+    except WebSocketDisconnect as e:
+        print(f"WebSocket disconnected with code: {e.code}")
+    except Exception as e:
+        print(f"WebSocket error: {e}")
+        # Safely close the websocket if not already closed
+        if not websocket.application_state == "CLOSED":
+            await websocket.close()
 
 # WebSocket for friends/family
-@app.websocket("/ws/family")
-async def websocket_endpoint_family(websocket: WebSocket):
+@app.websocket("/ws/blind")
+async def websocket_endpoint_blind(websocket: WebSocket):
     await websocket.accept()
-    await websocket.send_text("WebSocket for family/friends connected")
-    while True:
-        try:
-            data = await websocket.receive_text()
-            print(f"Received from family/friends: {data}")
-        except Exception as e:
-            print(f"Connection closed: {e}")
-            break
+    try:
+        while True:
+            # Assuming you are expecting to receive binary data
+            frame_data = await websocket.receive_bytes()
+            # Process received frame data here...
+            await websocket.send_text("Frame received")
+    except WebSocketDisconnect as e:
+        print(f"WebSocket disconnected with code: {e.code}")
+    except Exception as e:
+        print(f"WebSocket error: {e}")
+        # Safely close the websocket if not already closed
+        if not websocket.application_state == "CLOSED":
+            await websocket.close()
