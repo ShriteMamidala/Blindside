@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visually Impaired</title>
+    <style>
+        /* General body styling */
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+
+        /* Top image styling */
+        img {
+            max-width: 80%; /* Scales down for smaller screens */
+            height: auto;
+            margin-bottom: 30px; /* Space between image and box */
+        }
+
+        /* Large Responsive Box Styling */
+        .box {
+            width: 90%; /* Takes 90% of the screen width */
+            max-width: 2000px; /* Doesn't grow beyond 800px */
+            height: 80vh; /* 60% of the screen height */
+            max-height: 2000px; /* Doesn't grow beyond 600px */
+            background-color: #ffffff;
+            border: 3px solid #cccccc;
+            border-radius: 12px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        video {
+            width: 100%; /* Stretch video to fill the box */
+            height: 100%; /* Stretch video to fill the box */
+            object-fit: cover; /* Crop and maintain aspect ratio */
+            border-radius: 12px; /* Match the box's rounded corners */
+        }
+
+    </style>
+</head>
+<body>
+    <!-- Top Image -->
+    <img src="/static/example_image.jpg" alt="Placeholder Image">
+
+    <!-- Large Responsive Center Box -->
+    <div class="box">
+        <!-- Video Element for Camera Feed -->
+        <video id="camera" autoplay muted playsinline></video>
+    </div>
+
+<script>
+    let ws; // WebSocket variable
+
+    async function startCamera() {
+        try {
+            const videoElement = document.getElementById('camera');
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            videoElement.srcObject = stream;
+
+            // Initialize WebSocket after camera starts
+            initializeWebSocket();
+        } catch (error) {
+            console.error("Error accessing the camera:", error);
+        }
+    }
+
+    function initializeWebSocket() {
+        // Ensure the URL matches your WebSocket endpoint
+        ws = new WebSocket('ws://localhost:8000/ws/blind');
+
+        ws.onopen = function() {
+            console.log("WebSocket connection established");
+            startSendingFrames();
+        };
+
+        ws.onerror = function(error) {
+            console.error("WebSocket error:", error);
+        };
+    }
+
+    function startSendingFrames() {
+        const videoElement = document.getElementById('camera');
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+
+        // Set canvas size to video size for capturing
+        canvas.width = videoElement.videoWidth;
+        canvas.height = videoElement.videoHeight;
+
+        // Send a frame every 100 milliseconds (adjust as necessary)
+        setInterval(() => {
+            context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+            canvas.toBlob(sendFrame, 'image/jpeg'); // Capture frame as JPEG
+        }, 100);
+    }
+
+    function sendFrame(blob) {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(blob);
+        }
+    }
+
+    window.onload = startCamera;
+</script>
+    
+
+
+</body>
+</html>
