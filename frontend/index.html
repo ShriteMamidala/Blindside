@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="login-container">
+        <!-- Page title -->
+        <h1>Login</h1>
+        <!-- Username field -->
+        <input type="text" placeholder="Username" aria-label="Username">
+        
+        <!-- Password field with eye toggle -->
+        <div class="password-container">
+            <input type="password" id="password" placeholder="Password" aria-label="Password">
+            <span class="toggle-password" onclick="togglePasswordVisibility()">
+                👁️
+            </span>
+        </div>
+        
+        <!-- Small links -->
+        <div class="small-links">
+            <a href="#" aria-label="Forgot Password">Forgot Password?</a>
+            |
+            <a href="#" aria-label="Sign Up">Sign Up</a>
+        </div>
+    </div>
+    
+    <!-- Dark mode toggle -->
+    <button class="dark-mode-toggle" onclick="toggleDarkMode()">Toggle Dark Mode</button>
+    
+    <!-- External script -->
+    <script src="script.js"></script>
+</body>
+</html>
