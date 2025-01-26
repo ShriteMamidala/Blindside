@@ -113,7 +113,24 @@
 
     window.onload = startCamera;
 </script>
-    
+
+<audio id="audioPlayer" controls></audio>
+<script>
+    function playAudio(message) {
+        fetch(`/audio`) // Adjust the endpoint as needed
+            .then(response => response.blob())
+            .then(blob => {
+                const url = URL.createObjectURL(blob);
+                const audioPlayer = document.getElementById("audioPlayer");
+                audioPlayer.src = url;
+                audioPlayer.play();
+            })
+            .catch(error => console.error("Error playing audio:", error));
+    }
+
+    // Example: Trigger the function with a message
+    playAudio("Hello, this is a test message!");
+</script>
 
 
 </body>
