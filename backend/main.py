@@ -17,9 +17,23 @@ from playsound import playsound
 
 app = FastAPI()
 
-app.mount("/static", StaticFiles(directory="frontend", html=True), name="static")
+frontend_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../frontend"))
+print(f"Resolved absolute path: {frontend_path}")
+if not os.path.isdir(frontend_path):
+    raise RuntimeError(f"Directory '{frontend_path}' does not exist")
+app.mount("/static", StaticFiles(directory=frontend_path, html=True), name="static")
 
-model = YOLO(r'runs\detect\train4\weights\best.pt')  # Path to trained YOLOv8 weights
+
+current_dir = os.path.dirname(__file__)
+
+# Navigate one directory up to remove 'backend' from the path
+project_root = os.path.abspath(os.path.join(current_dir, ".."))
+
+# Construct the path to the YOLO weights file
+weights_path = os.path.join(project_root, r"runs\detect\train4\weights\best.pt")
+
+# Load the model with the relative path
+model = YOLO(weights_path)
 model.eval()
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.environ["GOOGLE_CLOUD_TTS"]
 
@@ -51,7 +65,7 @@ async def websocket_endpoint_blind(websocket: WebSocket):
             input_image = preprocess_frame_data(frame_data)
 
             # Run YOLO inference
-            results = model.predict(input_image, imgsz=640, conf=0.7)
+            results = model.predict(input_image, imgsz=640, conf=0.1)
 
             # Extract detections with bounding boxes and class names
             detections = []
@@ -170,6 +184,8 @@ def text_to_speech(message):
     with open(audio_file, "wb") as out:
         out.write(response.audio_content)
         print(f"Audio content written to '{audio_file}'")
+
+    print(f"Audio file generated: {os.path.abspath('output.mp3')}")
 
     # Play the audio file
     playsound(audio_file)
